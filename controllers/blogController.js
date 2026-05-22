@@ -21,8 +21,7 @@ export const getBlogs = async (req, res) => {
 
     return res.json(response.data);
   } catch (err) {
-    console.log("🔥 BLOG FETCH ERROR:");
-    console.log(err.response?.data || err.message);
+    console.log("GET ERROR:", err.response?.data || err.message);
 
     return res.status(500).json({
       error: "Failed to fetch blogs",
@@ -30,6 +29,7 @@ export const getBlogs = async (req, res) => {
     });
   }
 };
+
 // ========================
 // CREATE BLOG
 // ========================
@@ -55,9 +55,7 @@ export const createBlog = async (req, res) => {
       date: new Date().toISOString(),
     };
 
-    const fileContent = Buffer.from(
-      JSON.stringify(data, null, 2)
-    ).toString("base64");
+    const fileContent = Buffer.from(JSON.stringify(data, null, 2)).toString("base64");
 
     const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
@@ -76,15 +74,16 @@ export const createBlog = async (req, res) => {
       post: data,
     });
 
-  }catch (err) {
-  console.log("🔥 FULL ERROR:");
-  console.log(JSON.stringify(err.response?.data, null, 2));
+  } catch (err) {
+    console.log("CREATE ERROR:", err.response?.data || err.message);
 
-  return res.status(500).json({
-    error: "Failed to create blog",
-    detail: err.response?.data,
-  });
-}
+    return res.status(500).json({
+      error: "Failed to create blog",
+      detail: err.response?.data || err.message,
+    });
+  }
+};
+
 // ========================
 // UPDATE BLOG
 // ========================
@@ -97,9 +96,7 @@ export const updateBlog = async (req, res) => {
 
     const file = await axios.get(url, { headers });
 
-    const updated = Buffer.from(
-      JSON.stringify(req.body)
-    ).toString("base64");
+    const updated = Buffer.from(JSON.stringify(req.body)).toString("base64");
 
     await axios.put(
       url,
@@ -124,24 +121,10 @@ export const deleteBlog = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!id) {
-      return res.status(400).json({ error: "Missing blog id" });
-    }
-
     const path = `posts/${id}.json`;
     const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
-    let file;
-
-    try {
-      file = await axios.get(url, { headers });
-    } catch (err) {
-      return res.status(404).json({ error: "Blog not found on GitHub" });
-    }
-
-    if (!file?.data?.sha) {
-      return res.status(400).json({ error: "Missing file SHA" });
-    }
+    const file = await axios.get(url, { headers });
 
     await axios.delete(url, {
       headers,
@@ -151,22 +134,19 @@ export const deleteBlog = async (req, res) => {
       },
     });
 
-    return res.json({ message: "Deleted successfully" });
-
+    res.json({ message: "Deleted successfully" });
   } catch (err) {
-    console.log("DELETE ERROR:", err.response?.data || err.message);
-
-    return res.status(500).json({
+    res.status(500).json({
       error: "Delete failed",
       detail: err.response?.data || err.message,
     });
   }
 };
 
-  // ========================
-  // UPLOAD IMAGE (GITHUB VERSION)
-  // ========================
-  export const uploadImage = async (req, res) => {
+// ========================
+// UPLOAD IMAGE
+// ========================
+export const uploadImage = async (req, res) => {
   try {
     const { file, filename } = req.body;
 
@@ -187,13 +167,14 @@ export const deleteBlog = async (req, res) => {
       { headers }
     );
 
-    // IMPORTANT: repo must be like "username/repo"
     const imageUrl = `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/main/${path}`;
 
     return res.json({ imageUrl });
+
   } catch (err) {
-    console.log(err.response?.data || err.message);
-    return res.status(500).json({ error: "Image upload failed" });
+    return res.status(500).json({
+      error: "Image upload failed",
+      detail: err.response?.data || err.message,
+    });
   }
 };
-}
