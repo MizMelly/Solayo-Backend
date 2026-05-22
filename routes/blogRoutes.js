@@ -33,7 +33,7 @@ router.post(
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    const imageUrl = `https://solayo-backend.vercel.app/uploads/${req.file.filename}`;
 
     res.json({ imageUrl });
   }
