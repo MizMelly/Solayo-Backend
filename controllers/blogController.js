@@ -158,6 +158,8 @@ export const deleteBlog = async (req, res) => {
       detail: err.response?.data || err.message,
     });
   }
+};
+
   // ========================
   // UPLOAD IMAGE (GITHUB VERSION)
   // ========================
@@ -189,5 +191,4 @@ export const deleteBlog = async (req, res) => {
     console.log(err.response?.data || err.message);
     return res.status(500).json({ error: "Image upload failed" });
   }
-};
 };
