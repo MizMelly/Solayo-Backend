@@ -16,7 +16,6 @@ router.post("/", authMiddleware, createBlog);
 router.put("/:id", authMiddleware, updateBlog);
 router.delete("/:id", authMiddleware, deleteBlog);
 
-// ✅ ONLY ONE upload route
 router.post("/upload", authMiddleware, uploadImage);
 
 export default router;
