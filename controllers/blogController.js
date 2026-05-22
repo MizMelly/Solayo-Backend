@@ -55,8 +55,12 @@ export const createBlog = async (req, res) => {
       return res.status(400).json({ error: "Title and content required" });
     }
 
-    const slug = title.toLowerCase().replace(/\s+/g, "-");
-    const path = `posts/${slug}.json`;
+    const slug =
+  title.toLowerCase().replace(/\s+/g, "-") +
+  "-" +
+  Date.now();
+
+const path = `posts/${slug}.json`;
 
     const data = {
       slug,
