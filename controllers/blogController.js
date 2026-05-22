@@ -48,6 +48,10 @@ export const createBlog = async (req, res) => {
   try {
     const { title, content, image, author, excerpt, category } = req.body;
 
+    if (!title || !content) {
+      return res.status(400).json({ error: "Title and content required" });
+    }
+
     const slug = title.toLowerCase().replace(/\s+/g, "-");
     const path = `posts/${slug}.json`;
 
@@ -56,13 +60,15 @@ export const createBlog = async (req, res) => {
       title,
       content,
       image: image || "",
-      author,
-      excerpt,
-      category,
+      author: author || "Admin",
+      excerpt: excerpt || "",
+      category: category || "general",
       date: new Date().toISOString(),
     };
 
-    const base64 = Buffer.from(JSON.stringify(data)).toString("base64");
+    const fileContent = Buffer.from(
+      JSON.stringify(data, null, 2)
+    ).toString("base64");
 
     const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
@@ -70,19 +76,27 @@ export const createBlog = async (req, res) => {
       url,
       {
         message: `Add post: ${title}`,
-        content: base64,
-        branch: "main", 
+        content: fileContent,
+        branch: "main",
       },
       { headers }
     );
 
-    res.status(201).json({ message: "Blog created", post: data });
+    return res.status(201).json({
+      message: "Blog created",
+      post: data,
+    });
+
   } catch (err) {
-    console.log("CREATE ERROR:", err.response?.data || err.message);
-    res.status(500).json({ error: "Failed to create blog" });
+    console.log("CREATE BLOG ERROR 👇");
+    console.log(err.response?.data || err.message);
+
+    return res.status(500).json({
+      error: "Failed to create blog",
+      detail: err.response?.data || err.message,
+    });
   }
 };
-
 // ========================
 // UPDATE BLOG
 // ========================
