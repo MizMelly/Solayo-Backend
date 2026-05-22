@@ -89,13 +89,16 @@ export const createBlog = async (req, res) => {
     });
 
   } catch (err) {
-    console.log("CREATE ERROR:", err.response?.data || err.message);
+  console.log("FULL ERROR:");
+  console.log(err.response?.data);
+  console.log(err.message);
 
-    return res.status(500).json({
-      error: "Failed to create blog",
-      detail: err.response?.data || err.message,
-    });
-  }
+  return res.status(500).json({
+    error: "Failed to create blog",
+    detail: err.response?.data || err.message,
+    status: err.response?.status,
+  });
+}
 };
 
 // ========================
