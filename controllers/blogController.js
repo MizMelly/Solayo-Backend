@@ -62,7 +62,7 @@ export const createBlog = async (req, res) => {
       date: new Date().toISOString(),
     };
 
-    const fileContent = Buffer.from(JSON.stringify(data)).toString("base64");
+    const base64 = Buffer.from(JSON.stringify(data)).toString("base64");
 
     const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
@@ -70,14 +70,15 @@ export const createBlog = async (req, res) => {
       url,
       {
         message: `Add post: ${title}`,
-        content: fileContent,
+        content: base64,
+        branch: "main", 
       },
       { headers }
     );
 
     res.status(201).json({ message: "Blog created", post: data });
   } catch (err) {
-    console.log(err.response?.data || err.message);
+    console.log("CREATE ERROR:", err.response?.data || err.message);
     res.status(500).json({ error: "Failed to create blog" });
   }
 };
@@ -167,8 +168,8 @@ export const deleteBlog = async (req, res) => {
   try {
     const { file, filename } = req.body;
 
-    if (!file) {
-      return res.status(400).json({ error: "No image provided" });
+    if (!file || !filename) {
+      return res.status(400).json({ error: "Missing image data" });
     }
 
     const path = `images/${Date.now()}-${filename}`;
@@ -184,10 +185,10 @@ export const deleteBlog = async (req, res) => {
       { headers }
     );
 
-    // ✅ THIS is the correct GitHub raw URL
+    // IMPORTANT: repo must be like "username/repo"
     const imageUrl = `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/main/${path}`;
 
-    return res.json({ imageUrl }); // ✅ FIXED
+    return res.json({ imageUrl });
   } catch (err) {
     console.log(err.response?.data || err.message);
     return res.status(500).json({ error: "Image upload failed" });
