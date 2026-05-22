@@ -11,9 +11,7 @@ dotenv.config();
 
 const app = express();
 
-// __dirname fix (IMPORTANT)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 
 // middleware
 app.use(
@@ -28,8 +26,6 @@ app.use(
 
 app.use(express.json());
 
-// 🔥 THIS IS WHAT YOU WERE MISSING
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // routes
 app.use("/api/blogs", blogRoutes);
