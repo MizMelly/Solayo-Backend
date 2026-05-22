@@ -26,7 +26,7 @@ export const getBlogs = async (req, res) => {
         const fileData = await axios.get(file.download_url);
 
         return {
-          id: file.name.replace(".json", ""), // ✅ FIX HERE
+          id: file.name.replace(".json", ""), 
           ...fileData.data,
         };
       })
