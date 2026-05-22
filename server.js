@@ -9,20 +9,24 @@ dotenv.config();
 
 const app = express();
 
-// middleware
+// ✅ MUST be first
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
       "https://solaye.vercel.app",
     ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
-app.use(express.json());
+// 🔥 IMPORTANT for preflight (THIS FIXES YOUR ERROR)
+app.options("*", cors());
 
-// routes
+app.use(express.json({ limit: "10mb" })); // also fixes upload issues
+
 app.use("/api/blogs", blogRoutes);
 app.use("/api/auth", authRoutes);
 
