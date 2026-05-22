@@ -21,8 +21,7 @@ export const getBlogs = async (req, res) => {
 
     return res.json(response.data);
   } catch (err) {
-    console.log("🔥 BLOG FETCH ERROR:");
-    console.log(err.response?.data || err.message);
+    console.log("GET ERROR:", err.response?.data || err.message);
 
     return res.status(500).json({
       error: "Failed to fetch blogs",
@@ -30,13 +29,12 @@ export const getBlogs = async (req, res) => {
     });
   }
 };
+
 // ========================
 // CREATE BLOG
 // ========================
 export const createBlog = async (req, res) => {
   try {
-    console.log("GITHUB_REPO:", process.env.GITHUB_REPO);
-console.log("GITHUB_TOKEN exists:", !!process.env.GITHUB_TOKEN);
     const { title, content, image, author, excerpt, category } = req.body;
 
     if (!title || !content) {
@@ -84,8 +82,8 @@ console.log("GITHUB_TOKEN exists:", !!process.env.GITHUB_TOKEN);
       detail: err.response?.data || err.message,
     });
   }
-  
 };
+
 // ========================
 // UPDATE BLOG
 // ========================
@@ -98,9 +96,7 @@ export const updateBlog = async (req, res) => {
 
     const file = await axios.get(url, { headers });
 
-    const updated = Buffer.from(
-      JSON.stringify(req.body)
-    ).toString("base64");
+    const updated = Buffer.from(JSON.stringify(req.body)).toString("base64");
 
     await axios.put(
       url,
@@ -125,24 +121,10 @@ export const deleteBlog = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!id) {
-      return res.status(400).json({ error: "Missing blog id" });
-    }
-
     const path = `posts/${id}.json`;
     const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
-    let file;
-
-    try {
-      file = await axios.get(url, { headers });
-    } catch (err) {
-      return res.status(404).json({ error: "Blog not found on GitHub" });
-    }
-
-    if (!file?.data?.sha) {
-      return res.status(400).json({ error: "Missing file SHA" });
-    }
+    const file = await axios.get(url, { headers });
 
     await axios.delete(url, {
       headers,
@@ -152,41 +134,35 @@ export const deleteBlog = async (req, res) => {
       },
     });
 
-    return res.json({ message: "Deleted successfully" });
-
+    res.json({ message: "Deleted successfully" });
   } catch (err) {
-    console.log("DELETE ERROR:", err.response?.data || err.message);
-
-    return res.status(500).json({
+    res.status(500).json({
       error: "Delete failed",
       detail: err.response?.data || err.message,
     });
   }
 };
 
-  // ========================
-  // UPLOAD IMAGE (GITHUB VERSION)
-  // ========================
-  export const uploadImage = async (req, res) => {
+// ========================
+// UPLOAD IMAGE
+// ========================
+export const uploadImage = async (req, res) => {
   try {
-    const file = req.file;
+    const { file, filename } = req.body;
 
-    if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
+    if (!file || !filename) {
+      return res.status(400).json({ error: "Missing image data" });
     }
 
-    const base64 = file.buffer.toString("base64");
+    const path = `images/${Date.now()}-${filename}`;
 
-    const path = `images/${Date.now()}-${file.originalname}`;
-
-    const url = `https://api.github.com/repos/${process.env.GITHUB_REPO}/contents/${path}`;
+    const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
     await axios.put(
       url,
       {
         message: "upload image",
-        content: base64,
-        branch: "main",
+        content: file,
       },
       { headers }
     );
@@ -196,8 +172,6 @@ export const deleteBlog = async (req, res) => {
     return res.json({ imageUrl });
 
   } catch (err) {
-    console.log(err.response?.data || err.message);
-
     return res.status(500).json({
       error: "Image upload failed",
       detail: err.response?.data || err.message,
