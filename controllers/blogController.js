@@ -175,18 +175,19 @@ export const deleteBlog = async (req, res) => {
 
     const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
-    const response = await axios.put(
+    await axios.put(
       url,
       {
         message: "upload image",
-        content: file, // base64
+        content: file,
       },
       { headers }
     );
 
+    // ✅ THIS is the correct GitHub raw URL
     const imageUrl = `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/main/${path}`;
 
-    return res.json({ url: imageUrl });
+    return res.json({ imageUrl }); // ✅ FIXED
   } catch (err) {
     console.log(err.response?.data || err.message);
     return res.status(500).json({ error: "Image upload failed" });
