@@ -87,16 +87,15 @@ export const createBlog = async (req, res) => {
       post: data,
     });
 
-  } catch (err) {
-    console.log("CREATE BLOG ERROR 👇");
-    console.log(err.response?.data || err.message);
+  }catch (err) {
+  console.log("🔥 FULL ERROR:");
+  console.log(JSON.stringify(err.response?.data, null, 2));
 
-    return res.status(500).json({
-      error: "Failed to create blog",
-      detail: err.response?.data || err.message,
-    });
-  }
-};
+  return res.status(500).json({
+    error: "Failed to create blog",
+    detail: err.response?.data,
+  });
+}
 // ========================
 // UPDATE BLOG
 // ========================
@@ -208,3 +207,4 @@ export const deleteBlog = async (req, res) => {
     return res.status(500).json({ error: "Image upload failed" });
   }
 };
+}
