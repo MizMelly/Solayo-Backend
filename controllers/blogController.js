@@ -19,26 +19,15 @@ export const getBlogs = async (req, res) => {
 
     const response = await axios.get(url, { headers });
 
-    if (!Array.isArray(response.data)) return res.json([]);
-
-    const posts = await Promise.all(
-      response.data.map(async (file) => {
-        const fileData = await axios.get(file.download_url);
-
-        return {
-          id: file.name.replace(".json", ""), 
-          ...fileData.data,
-        };
-      })
-    );
-
-    res.json(posts);
+    return res.json(response.data);
   } catch (err) {
+    console.log("🔥 BLOG FETCH ERROR:");
     console.log(err.response?.data || err.message);
 
-    if (err.response?.status === 404) return res.json([]);
-
-    res.status(500).json({ error: "Failed to fetch blogs" });
+    return res.status(500).json({
+      error: "Failed to fetch blogs",
+      detail: err.response?.data || err.message,
+    });
   }
 };
 // ========================
