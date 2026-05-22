@@ -8,6 +8,7 @@ import {
 } from "../controllers/blogController.js";
 
 import { authMiddleware } from "../middleware/auth.js";
+import upload from "../middleware/upload.js"; // ✅ IMPORTANT
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.put("/:id", authMiddleware, updateBlog);
 // DELETE BLOG
 router.delete("/:id", authMiddleware, deleteBlog);
 
-// UPLOAD IMAGE (GITHUB VERSION)
-router.post("/upload", authMiddleware, uploadImage);
+// UPLOAD IMAGE (FIXED)
+router.post("/upload", authMiddleware, upload.single("file"), uploadImage);
 
 export default router;

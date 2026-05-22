@@ -166,31 +166,38 @@ export const deleteBlog = async (req, res) => {
   // ========================
   export const uploadImage = async (req, res) => {
   try {
-    const { file, filename } = req.body;
+    const file = req.file;
 
-    if (!file || !filename) {
-      return res.status(400).json({ error: "Missing image data" });
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const path = `images/${Date.now()}-${filename}`;
+    const base64 = file.buffer.toString("base64");
 
-    const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
+    const path = `images/${Date.now()}-${file.originalname}`;
+
+    const url = `https://api.github.com/repos/${process.env.GITHUB_REPO}/contents/${path}`;
 
     await axios.put(
       url,
       {
         message: "upload image",
-        content: file,
+        content: base64,
+        branch: "main",
       },
       { headers }
     );
 
-    // IMPORTANT: repo must be like "username/repo"
     const imageUrl = `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/main/${path}`;
 
     return res.json({ imageUrl });
+
   } catch (err) {
     console.log(err.response?.data || err.message);
-    return res.status(500).json({ error: "Image upload failed" });
+
+    return res.status(500).json({
+      error: "Image upload failed",
+      detail: err.response?.data || err.message,
+    });
   }
 };
