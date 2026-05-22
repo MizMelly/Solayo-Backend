@@ -19,7 +19,21 @@ export const getBlogs = async (req, res) => {
 
     const response = await axios.get(url, { headers });
 
-    return res.json(response.data);
+    const files = response.data;
+
+    const blogs = await Promise.all(
+      files.map(async (file) => {
+        const contentRes = await axios.get(file.download_url);
+
+        return {
+          id: file.name.replace(".json", ""),
+          ...contentRes.data,
+        };
+      })
+    );
+
+    return res.json(blogs);
+
   } catch (err) {
     console.log("GET ERROR:", err.response?.data || err.message);
 
