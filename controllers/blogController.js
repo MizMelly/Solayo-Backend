@@ -158,6 +158,9 @@ export const deleteBlog = async (req, res) => {
       detail: err.response?.data || err.message,
     });
   }
+  // ========================
+  // UPLOAD IMAGE (GITHUB VERSION)
+  // ========================
   export const uploadImage = async (req, res) => {
   try {
     const { file, filename } = req.body;
