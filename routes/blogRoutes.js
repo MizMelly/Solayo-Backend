@@ -8,23 +8,15 @@ import {
 } from "../controllers/blogController.js";
 
 import { authMiddleware } from "../middleware/auth.js";
-import upload from "../middleware/upload.js"; // ✅ IMPORTANT
 
 const router = express.Router();
 
-// GET BLOGS
 router.get("/", getBlogs);
-
-// CREATE BLOG
 router.post("/", authMiddleware, createBlog);
-
-// UPDATE BLOG
 router.put("/:id", authMiddleware, updateBlog);
-
-// DELETE BLOG
 router.delete("/:id", authMiddleware, deleteBlog);
 
-// UPLOAD IMAGE (FIXED)
-router.post("/upload", authMiddleware, upload.single("file"), uploadImage);
+// ✅ ONLY ONE upload route
+router.post("/upload", authMiddleware, uploadImage);
 
 export default router;

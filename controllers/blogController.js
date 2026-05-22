@@ -82,6 +82,8 @@ export const createBlog = async (req, res) => {
       detail: err.response?.data || err.message,
     });
   }
+  console.log("GITHUB_REPO:", process.env.GITHUB_REPO);
+console.log("GITHUB_TOKEN exists:", !!process.env.GITHUB_TOKEN);
 };
 // ========================
 // UPDATE BLOG
