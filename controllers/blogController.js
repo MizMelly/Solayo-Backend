@@ -151,27 +151,36 @@ export const uploadImage = async (req, res) => {
     const { file, filename } = req.body;
 
     if (!file || !filename) {
-      return res.status(400).json({ error: "Missing image data" });
+      return res.status(400).json({ error: "Missing file or filename" });
+    }
+
+    const repo = process.env.GITHUB_REPO;
+
+    if (!repo || !repo.includes("/")) {
+      return res.status(500).json({ error: "Invalid GITHUB_REPO format" });
     }
 
     const path = `images/${Date.now()}-${filename}`;
 
-    const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${path}`;
+    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
 
-    await axios.put(
+    const response = await axios.put(
       url,
       {
         message: "upload image",
         content: file,
+        branch: "main",
       },
       { headers }
     );
 
-    const imageUrl = `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/main/${path}`;
+    const imageUrl = `https://raw.githubusercontent.com/${repo}/main/${path}`;
 
     return res.json({ imageUrl });
 
   } catch (err) {
+    console.log("UPLOAD ERROR:", err.response?.data || err.message);
+
     return res.status(500).json({
       error: "Image upload failed",
       detail: err.response?.data || err.message,
