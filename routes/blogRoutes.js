@@ -4,10 +4,10 @@ import {
   createBlog,
   updateBlog,
   deleteBlog,
+  uploadImage,
 } from "../controllers/blogController.js";
 
 import { authMiddleware } from "../middleware/auth.js";
-import upload from "../config/upload.js";
 
 const router = express.Router();
 
@@ -17,26 +17,13 @@ router.get("/", getBlogs);
 // CREATE BLOG
 router.post("/", authMiddleware, createBlog);
 
-// UPDATE
+// UPDATE BLOG
 router.put("/:id", authMiddleware, updateBlog);
 
-// DELETE
+// DELETE BLOG
 router.delete("/:id", authMiddleware, deleteBlog);
 
-// UPLOAD IMAGE (REAL FIX 🔥)
-router.post(
-  "/upload",
-  authMiddleware,
-  upload.single("image"),
-  (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-
-    res.json({ imageUrl });
-  }
-);
+// UPLOAD IMAGE (GITHUB VERSION)
+router.post("/upload", authMiddleware, uploadImage);
 
 export default router;
